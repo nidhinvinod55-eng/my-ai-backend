@@ -29,7 +29,14 @@ app.post("/chat", async (req, res) => {
 
                 body: JSON.stringify({
                     model: "gpt-5.6-luna",
-                    input: history
+
+                    input: history,
+
+                    tools: [
+                        {
+                            type: "web_search"
+                        }
+                    ]
                 })
             }
         );
@@ -47,14 +54,9 @@ app.post("/chat", async (req, res) => {
             });
         }
 
-        let reply = "";
-
-        if (data.output_text) {
-            reply = data.output_text;
-        }
+        let reply = data.output_text || "";
 
         if (!reply && data.output) {
-
             for (const item of data.output) {
 
                 if (!item.content) continue;
@@ -64,7 +66,6 @@ app.post("/chat", async (req, res) => {
                     if (content.text) {
                         reply += content.text;
                     }
-
                 }
             }
         }
