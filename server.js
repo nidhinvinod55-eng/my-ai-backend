@@ -443,6 +443,67 @@ app.post("/computer", async (req, res) => {
         });
     }
 });
+// SCREEN ANALYSIS
+app.post("/computer-screen", async (req, res) => {
+    try {
+        const image = req.body.image;
+
+        if (!image) {
+            return res.status(400).json({
+                error: "No screenshot received"
+            });
+        }
+
+        const response = await fetch(
+            "https://api.openai.com/v1/responses",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization":
+                        `Bearer ${process.env.OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-5.6-luna",
+                    input: [
+                        {
+                            role: "user",
+                            content: [
+                                {
+                                    type: "input_text",
+                                    text: "Look at this computer screenshot. Describe what is visible and suggest the next useful computer action."
+                                },
+                                {
+                                    type: "input_image",
+                                    image_url: image
+                                }
+                            ]
+                        }
+                    ]
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return res.status(response.status).json({
+                error: data
+            });
+        }
+
+        res.json({
+            analysis: data.output_text || "No analysis returned."
+        });
+
+    } catch (error) {
+        console.error("Screen analysis error:", error);
+
+        res.status(500).json({
+            error: error.message
+        });
+    }
+}); 
 const PORT =
     process.env.PORT || 3000;
 
