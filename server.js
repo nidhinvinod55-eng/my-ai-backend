@@ -344,6 +344,105 @@ app.post("/chat", async (req, res) => {
 // START SERVER
 // =====================================
 
+// =====================================
+// COMPUTER USE - STEP 5B
+// =====================================
+
+app.post("/computer", async (req, res) => {
+
+    try {
+
+        const task = req.body.task;
+
+        if (!task) {
+            return res.status(400).json({
+                error: "No computer task received"
+            });
+        }
+
+        const response = await fetch(
+            "https://api.openai.com/v1/responses",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization":
+                        `Bearer ${process.env.OPENAI_API_KEY}`
+                },
+
+                body: JSON.stringify({
+                    model: "computer-use-preview",
+
+                    tools: [
+                        {
+                            type: "computer_use_preview",
+
+                            display_width: 1280,
+                            display_height: 720,
+
+                            environment: "browser"
+                        }
+                    ],
+
+                    input: [
+                        {
+                            role: "user",
+                            content: [
+                                {
+                                    type: "input_text",
+                                    text: task
+                                }
+                            ]
+                        }
+                    ]
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            console.error(
+                "Computer-use error:",
+                JSON.stringify(data)
+            );
+
+            return res.status(response.status).json({
+                error: data
+            });
+        }
+
+        const computerCalls =
+            (data.output || []).filter(
+                item =>
+                    item.type ===
+                    "computer_call"
+            );
+
+        res.json({
+            message:
+                "Computer-use request created.",
+
+            task: task,
+
+            computer_calls:
+                computerCalls
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Computer server error:",
+            error
+        );
+
+        res.status(500).json({
+            error: error.message
+        });
+    }
+});
 const PORT =
     process.env.PORT || 3000;
 
