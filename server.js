@@ -492,9 +492,23 @@ app.post("/computer-screen", async (req, res) => {
             });
         }
 
-        res.json({
-            analysis: data.output_text || "No analysis returned."
-        });
+        let analysis = data.output_text || "";
+
+if (!analysis && data.output) {
+    for (const item of data.output) {
+        if (!item.content) continue;
+
+        for (const content of item.content) {
+            if (content.text) {
+                analysis += content.text;
+            }
+        }
+    }
+}
+
+res.json({
+    analysis: analysis || "No analysis returned."
+});
 
     } catch (error) {
         console.error("Screen analysis error:", error);
