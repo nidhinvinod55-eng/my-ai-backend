@@ -538,3 +538,35 @@ app.listen(
     }
 
 );
+app.post("/blender-task", (req, res) => {
+    const task = req.body.task;
+
+    if (!task) {
+        return res.status(400).json({ error: "No task received" });
+    }
+
+    const id = Date.now().toString();
+
+    blenderTasks.push({
+        id: id,
+        task: task
+    });
+
+    console.log("Blender task added:", task);
+
+    res.json({
+        success: true,
+        id: id,
+        task: task
+    });
+});
+
+app.get("/blender-task/next", (req, res) => {
+    if (blenderTasks.length === 0) {
+        return res.json({ task: null });
+    }
+
+    const task = blenderTasks.shift();
+
+    res.json(task);
+});
