@@ -1,4 +1,5 @@
 const express = require("express");
+let blenderTasks = [];
 const cors = require("cors");
 
 const app = express();
